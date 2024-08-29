@@ -10,6 +10,24 @@ from enum import Enum
 # distinguish between the addition and multiplication operators
 NodeType = Enum('BinOpNodeType', ['number', 'operator'])
 
+
+class BinOpAstTester(unittest.TestCase):
+    ins = osjoin('testbench', 'combined', 'inputs')
+    outs = osjoin('testbench', 'combined', 'outputs')
+
+    def test_all(self):
+        for fname in os.listdir(self.ins):
+            with open(osjoin(self.ins, fname)) as f:
+                inp = f.read().split()
+            with open(osjoin(self.outs, fname)) as f:
+                expected = f.read()
+                with self.subTest(msg=f"Testing {fname}", inp=inp, expected=expected):
+                    t = BinOpAst([i for i in inp])
+                    t.simplify_binops()
+                    out = t.prefix_str()
+                    self.assertEqual(out, expected)
+
+
 class BinOpAst():
     """
     A somewhat quick and dirty structure to represent a binary operator AST.
@@ -17,11 +35,13 @@ class BinOpAst():
     Reads input as a list of tokens in prefix notation, converts into internal representation,
     then can convert to prefix, postfix, or infix string output.
     """
+
     def __init__(self, prefix_list):
         """
         Initialize a binary operator AST from a given list in prefix notation.
         Destroys the list that is passed in.
         """
+
         self.val = prefix_list.pop(0)
         if self.val.isnumeric():
             self.type = NodeType.number
@@ -37,9 +57,9 @@ class BinOpAst():
         Convert the binary tree printable string where indentation level indicates
         parent/child relationships
         """
-        ilvl = '  '*indent
-        left = '\n  ' + ilvl + self.left.__str__(indent+1) if self.left else ''
-        right = '\n  ' + ilvl + self.right.__str__(indent+1) if self.right else ''
+        ilvl = '  ' * indent
+        left = '\n  ' + ilvl + self.left.__str__(indent + 1) if self.left else ''
+        right = '\n  ' + ilvl + self.right.__str__(indent + 1) if self.right else ''
         return f"{ilvl}{self.val}{left}{right}"
 
     def __repr__(self):
@@ -51,6 +71,7 @@ class BinOpAst():
         Convert the BinOpAst to a prefix notation string.
         Make use of new Python 3.10 case!
         """
+
         match self.type:
             case NodeType.number:
                 return self.val
@@ -67,6 +88,7 @@ class BinOpAst():
                 return self.val
             case NodeType.operator:
                 return '(' + self.left.infix_str() + ' ' + self.val + ' ' + self.right.infix_str() + ')'
+
     def postfix_str(self):
         """
         Convert the BinOpAst to a prefix notation string.
@@ -83,18 +105,43 @@ class BinOpAst():
         Reduce additive identities
         x + 0 = x
         """
-        # IMPLEMENT ME!
-        pass
-                        
+        if self.right:
+            if self.type == NodeType.operator:
+                if self.right.val == '0':
+                    self.val = self.left.val
+                    self.type = NodeType.number
+                    return self
+                elif self.right.type == NodeType.number:
+                    if self.left.val == '0':
+                        self.val = self.right.val
+                        self.type = NodeType.number
+                        return self
+                else:
+                    return self.right.additive_identity()
+        else:
+            return
+
     def multiplicative_identity(self):
         """
         Reduce multiplicative identities
         x * 1 = x
         """
-        # IMPLEMENT ME!
-        pass
-    
-    
+        if self.right:
+            if self.type == NodeType.operator:
+                if self.right.val == '1':
+                    self.val = self.left.val
+                    self.type = NodeType.number
+                    return self
+                elif self.right.type == NodeType.number:
+                    if self.left.val == '1':
+                        self.val = self.right.val
+                        self.type = NodeType.number
+                        return self
+                else:
+                    return self.right.multiplicative_identity()
+        else:
+            return
+
     def mult_by_zero(self):
         """
         Reduce multiplication by zero
@@ -102,7 +149,7 @@ class BinOpAst():
         """
         # Optionally, IMPLEMENT ME! (I'm pretty easy)
         pass
-    
+
     def constant_fold(self):
         """
         Fold constants,
@@ -112,7 +159,7 @@ class BinOpAst():
         # Optionally, IMPLEMENT ME! This is a bit more challenging. 
         # You also likely want to add an additional node type to your AST
         # to represent identifiers.
-        pass            
+        pass
 
     def simplify_binops(self):
         """
@@ -130,3 +177,10 @@ class BinOpAst():
 
 if __name__ == "__main__":
     unittest.main()
+    #test_str = "+ 2 * 5 + 7 * 7 1".split()
+    #print(f"Input: {test_str}")
+    #test = BinOpAst(test_str)
+    #print(test)
+    #print()
+    #test.simplify_binops()
+    #print(f"Output: {test.prefix_str()}")
