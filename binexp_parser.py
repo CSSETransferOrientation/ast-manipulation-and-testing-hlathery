@@ -12,15 +12,21 @@ NodeType = Enum('BinOpNodeType', ['number', 'operator'])
 
 
 class BinOpAstTester(unittest.TestCase):
-    ins = osjoin('testbench', 'combined', 'inputs')
-    outs = osjoin('testbench', 'combined', 'outputs')
+    tests = [osjoin('testbench','arith_id'),osjoin('testbench','mult_id'), osjoin('testbench','combined')]
 
     def test_all(self):
-        for fname in os.listdir(self.ins):
-            with open(osjoin(self.ins, fname)) as f:
-                inp = f.read().split()
-            with open(osjoin(self.outs, fname)) as f:
-                expected = f.read()
+        for all_tests in self.tests:
+            ins = osjoin(all_tests, 'inputs')
+            outs = osjoin(all_tests,'outputs')
+
+            for fname in os.listdir(ins):
+                input = osjoin(ins,fname)
+                output = osjoin(outs,fname)
+
+                with open(input) as f:
+                    inp = f.read().split()
+                with open(output) as f:
+                    expected = f.read()
                 with self.subTest(msg=f"Testing {fname}", inp=inp, expected=expected):
                     t = BinOpAst([i for i in inp])
                     t.simplify_binops()
