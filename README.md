@@ -13,3 +13,6 @@ I think the best thing I can take away from this assignment too is the use of th
 ## Critiques
 
 I think the only thing that I really didn't enjoy doing was the testbench. I found myself really enjoying learning how the class worked, and then implementing the identities. However the testbench just felt very irrating to deal with and I didn't exactly understand to much of what I was doing, I was just trying to run parallel to what we had done in class with the recursionIO.
+
+
+;;> Tests are pretty sparse so you missed a couple of bad bugs. Overall looks pretty good though!

@@ -111,6 +111,8 @@ class BinOpAst():
         Reduce additive identities
         x + 0 = x
         """
+        # ;;> recur should happen first so values propogate upward
+        # ;;> this doesn't recur on the left?
         if self.right:
             if self.type == NodeType.operator:
                 if self.right.val == '0':
@@ -132,6 +134,8 @@ class BinOpAst():
         Reduce multiplicative identities
         x * 1 = x
         """
+        # ;;> recur should happen first so values propogate upward
+        # ;;> this doesn't recur on the left?
         if self.right:
             if self.type == NodeType.operator:
                 if self.right.val == '1':
